@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Alexandria</title>
+  
+  <!-- Configurações PWA / Mobile Web App -->
+  <meta name="apple-mobile-web-app-title" content="Alexandria">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#161616">
+
+  <!-- Ícone Oficial Alexandria (SVG Data URI: 'A' clássico em dourado e terracota) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%23161616'/%3E%3Cpath d='M140 390 L256 120 L372 390' stroke='%23DE9B26' stroke-width='34' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M182 300 Q256 325 330 300' stroke='%23CE5A37' stroke-width='28' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='256' cy='225' r='20' fill='%23DE9B26'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%23161616'/%3E%3Cpath d='M140 390 L256 120 L372 390' stroke='%23DE9B26' stroke-width='34' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M182 300 Q256 325 330 300' stroke='%23CE5A37' stroke-width='28' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='256' cy='225' r='20' fill='%23DE9B26'/%3E%3C/svg%3E">
+
+  <!-- Tipografia: Montserrat (Títulos, UI, Números) + Arial (Corpo de texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #F5F2EB;
+      --surface: #FFFFFF;
+      --surface-subtle: #ECE8DE;
+      --ink: #161616;
+      --ink-muted: #6E6A63;
+      --border: #E2DDD2;
+      
+      --font-display: 'Montserrat', Arial, sans-serif;
+      --font-body: Arial, Helvetica, sans-serif;
+      
+      /* Cores temáticas Bento */
+      --card-terracotta: #CE5A37;
+      --card-mustard: #DE9B26;
+      --card-rust: #8F4922;
+      --card-indigo: #1A365D;
+      --card-sage: #526E59;
+      --card-slate: #4A5568;
+      --card-plum: #744253;
+      --card-amber: #B45309;
+
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding-bottom: 96px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 22px 18px;
+    }
+
+    /* Top Bar */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.5px;
+      font-weight: 900;
+    }
+
+    .icon-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+
+    /* Alternador de Visão Principal: Biblioteca vs Calendário */
+    .view-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #E5E0D5;
+      border-radius: 25px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+
+    .view-btn {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 0;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: var(--ink-muted);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: var(--ink);
+      color: #FFF;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+
+    /* Painel Bento de Métricas */
+    .bento-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .bento-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .bento-card.main-progress {
+      grid-column: span 2;
+      background: var(--ink);
+      color: #FFF;
+      border: none;
+      padding: 16px;
+    }
+
+    .bento-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    .bento-num {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .progress-track {
+      height: 7px;
+      background: rgba(255,255,255,0.22);
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--card-mustard);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Segmented Navigation (Abas de Aquisição) */
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 3px;
+      margin-bottom: 12px;
+    }
+
+    .seg-btn {
+      font-family: var(--font-display);
+      padding: 8px 3px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      border-radius: 11px;
+      border: none;
+      background: transparent;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .seg-btn.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Busca */
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 10px;
+      font-family: var(--font-body);
+    }
+
+    /* Subfiltros com rolagem horizontal e tags dinâmicas */
+    .subfilters-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+
+    .subfilters-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pill {
+      font-family: var(--font-display);
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      color: var(--ink-muted);
+    }
+
+    .pill.active {
+      background: var(--ink);
+      color: #FFF;
+      border-color: var(--ink);
+    }
+
+    .books-count-label {
+      font-family: var(--font-display);
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: var(--ink-muted);
+      margin: 10px 2px;
+    }
+
+    /* Grade de Livros */
+    .books-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .book-card {
+      border-radius: var(--radius-md);
+      padding: 14px;
+      min-height: 185px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #FFFFFF;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      position: relative;
+      transition: transform 0.1s ease;
+    }
+
+    .book-card:active {
+      transform: scale(0.98);
+    }
+
+    .card-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .card-pill {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(4px);
+    }
+
+    .card-pill.nobel-pill {
+      background: #FFFFFF;
+      color: var(--ink);
+    }
+
+    .card-pill.format-pill {
+      background: rgba(0, 0, 0, 0.35);
+      color: #FFF;
+    }
+
+    .card-pill.alert-recomprar {
+      background: #FFDD57;
+      color: #7A5200;
+      font-weight: 900;
+    }
+
+    .card-pill.alert-vender {
+      background: #3E2723;
+      color: #FFE082;
+      font-weight: 900;
+    }
+
+    .card-pill.cond-1 { background: #FF4D4D; color: #FFF; }
+    .card-pill.cond-2 { background: #FF944D; color: #FFF; }
+    .card-pill.cond-3 { background: #FFD24D; color: #4A3B00; }
+    .card-pill.cond-4 { background: #88D66C; color: #154006; }
+    .card-pill.cond-5 { background: #38E54D; color: #053B0B; font-weight: 900; }
+
+    .book-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .book-author {
+      font-family: var(--font-body);
+      font-size: 11px;
+      opacity: 0.9;
+      font-weight: 400;
+      margin-bottom: auto;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+
+    .footer-pill {
+      font-family: var(--font-display);
+      background: rgba(0,0,0,0.22);
+      padding: 3px 6px;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+
+    .stars-display {
+      color: #FFD700;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      font-size: 12px;
+    }
+
+    /* Visão de Calendário / Conclusões */
+    .calendar-view {
+      display: none;
+    }
+
+    .calendar-view.active {
+      display: block;
+    }
+
+    .cal-year-block {
+      margin-bottom: 24px;
+    }
+
+    .cal-year-header {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+
+    .cal-year-count {
+      font-size: 12px;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    .cal-month-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .cal-month-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--card-terracotta);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .cal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-top: 1px solid var(--surface-subtle);
+      cursor: pointer;
+    }
+
+    .cal-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .cal-item-info {
+      max-width: 75%;
+    }
+
+    .cal-item-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .cal-item-sub {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    /* Botão Flutuante Inferior */
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 36px);
+      max-width: 440px;
+      height: 56px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+      z-index: 80;
+    }
+
+    .nav-btn {
+      font-family: var(--font-display);
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal / Drawer */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.48);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-sheet {
+      background: var(--surface);
+      width: 100%;
+      max-width: 480px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 22px 20px 32px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 11px;
+    }
+
+    .form-group label {
+      font-family: var(--font-display);
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: var(--ink-muted);
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 14px;
+      outline: none;
+      font-family: var(--font-body);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Estrelas Interativas no Modal */
+    .star-rating-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .star-btn {
+      color: #D3CFC6;
+      transition: color 0.15s ease;
+    }
+
+    .star-btn.active {
+      color: #FFB800;
+    }
+
+    .btn-submit {
+      font-family: var(--font-display);
+      width: 100%;
+      padding: 13px;
+      background: var(--ink);
+      color: #FFF;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      font-size: 14px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      font-family: var(--font-display);
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: var(--card-terracotta);
+      border: none;
+      font-weight: 800;
+      font-size: 13px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-row">
+        <h1>Alexandria</h1>
+        <div class="icon-actions">
+          <button class="btn-circle" onclick="exportData()" title="Salvar Backup JSON">💾</button>
+          <button class="btn-circle" onclick="document.getElementById('fileImport').click()" title="Restaurar JSON">📥</button>
+          <input type="file" id="fileImport" style="display:none" accept=".json" onchange="importData(event)">
+        </div>
+      </div>
+
+      <!-- Alternador de Aba: Biblioteca vs Calendário -->
+      <div class="view-switcher">
+        <button class="view-btn active" id="btnViewLibrary" onclick="switchView('library')">Biblioteca</button>
+        <button class="view-btn" id="btnViewCalendar" onclick="switchView('calendar')">📅 Calendário</button>
+      </div>
+
+      <!-- Painel Bento de Métricas -->
+      <div class="bento-hero">
+        <div class="bento-card main-progress">
+          <span class="bento-title">Livros Concluídos</span>
+          <div class="bento-num" id="statReadProgress">0 de 0 (0%)</div>
+          <div class="progress-track">
+            <div class="progress-bar-fill" id="statProgressBar"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <span class="bento-title">Lendo Agora</span>
+          <div class="bento-num" id="statReadingCount">0</div>
+        </div>
+        <div class="bento-card">
+          <span class="bento-title">Lidos em 2026</span>
+          <div class="bento-num" id="statCurrentYear">0</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEW 1: BIBLIOTECA -->
+    <main id="librarySection">
+      <!-- Abas de Aquisição / Desapego -->
+      <div class="segmented-control">
+        <button class="seg-btn active" onclick="setAcquisitionFilter('todos', this)">Todos</button>
+        <button class="seg-btn" onclick="setAcquisitionFilter('comprado', this)">📦 Acervo</button>
+        <button class="seg-btn" onclick="setAcquisitionFilter('pendente', this)">🛒 A Comprar</button>
+        <button class="seg-btn" onclick="setAcquisitionFilter('vender_ruim', this)">💩 Vender</button>
+      </div>
+
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar título, autor, ano ou tag..." oninput="renderLibrary()">
+
+      <!-- Subfiltros: Lido, lendo, não lidos + Tags Dinâmicas -->
+      <div class="subfilters-row" id="chipsContainer"></div>
+
+      <div class="books-count-label" id="counterLabel">Carregando acervo...</div>
+      <div class="books-grid" id="booksGrid"></div>
+    </main>
+
+    <!-- VIEW 2: CALENDÁRIO DE CONCLUSÕES -->
+    <main id="calendarSection" class="calendar-view">
+      <div class="books-count-label">Linha do Tempo de Conclusões</div>
+      <div id="calendarContainer"></div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" onclick="openAddModal()">＋ Adicionar Livro</button>
+  </nav>
+
+  <!-- Modal Adicionar / Editar -->
+  <div class="modal" id="bookModal">
+    <div class="modal-sheet">
+      <h2 class="modal-title" id="modalHeading">Detalhes da Obra</h2>
+      <input type="hidden" id="formId">
+
+      <div class="form-group">
+        <label>Título do Livro</label>
+        <input type="text" id="formTitle" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Autor(a)</label>
+          <input type="text" id="formAuthor" required>
+        </div>
+        <div class="form-group">
+          <label>Ano</label>
+          <input type="number" id="formYear">
+        </div>
+      </div>
+
+      <!-- Status de Leitura Simplificado -->
+      <div class="form-group">
+        <label>Status de Leitura</label>
+        <select id="formStatus" onchange="toggleReadFields()">
+          <option value="nao_lido">Não lido</option>
+          <option value="lendo">Lendo</option>
+          <option value="lido">Lido</option>
+        </select>
+      </div>
+
+      <!-- Campos Exclusivos para Livro Lido -->
+      <div id="readExtraFields" style="display:none; background: var(--surface-subtle); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 11px;">
+        <div class="form-group">
+          <label>Data de Término</label>
+          <input type="date" id="formFinishedDate">
+        </div>
+        <div class="form-group">
+          <label>Sua Avaliação (1 a 5 estrelas)</label>
+          <div class="star-rating-box" id="starPicker">
+            <span class="star-btn" onclick="setFormRating(1)">★</span>
+            <span class="star-btn" onclick="setFormRating(2)">★</span>
+            <span class="star-btn" onclick="setFormRating(3)">★</span>
+            <span class="star-btn" onclick="setFormRating(4)">★</span>
+            <span class="star-btn" onclick="setFormRating(5)">★</span>
+          </div>
+          <input type="hidden" id="formRating" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Situação do Exemplar</label>
+        <select id="formAcquisition">
+          <option value="comprado">📦 No Acervo (Comprado)</option>
+          <option value="pendente">🛒 Pendente para Compra</option>
+          <option value="recomprar">⚠️ Recomprar (Baixa qualidade / Trocar edição)</option>
+          <option value="vender_ruim">💩 Vender (porque é uma merda)</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Formato</label>
+          <select id="formFormat">
+            <option value="nenhum">Nenhum / A definir</option>
+            <option value="fisico">📖 Livro Físico</option>
+            <option value="kindle">📱 Kindle</option>
+            <option value="ambos">📖+📱 Ambos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Conservação (1 a 5)</label>
+          <select id="formCondition">
+            <option value="0">Não se aplica</option>
+            <option value="5">5 - Novo</option>
+            <option value="4">4 - Bom</option>
+            <option value="3">3 - Regular</option>
+            <option value="2">2 - Desgastado</option>
+            <option value="1">1 - Muito estragado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tags (separadas por vírgula)</label>
+        <input type="text" id="formTags" placeholder="Ex: Nobel, Filosofia, História">
+      </div>
+
+      <button class="btn-submit" onclick="saveBook()">Salvar</button>
+      <button class="btn-delete" id="btnDelete" onclick="deleteBook()">Excluir Livro</button>
+      <button class="btn-delete" style="color:var(--ink-muted);" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    const palette = ['#CE5A37', '#DE9B26', '#8F4922', '#1A365D', '#526E59', '#4A5568', '#744253', '#B45309'];
+    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+    const conditionLabels = {
+      1: "1/5 Estragado",
+      2: "2/5 Desgastado",
+      3: "3/5 Regular",
+      4: "4/5 Bom",
+      5: "5/5 Novo"
+    };
+
+    // Base Nobel integral (1901 - 2026)
+    const nobelMasterDataset = [
+      [1901, "Sully Prudhomme", ["Stances et Poèmes", "La Justice", "Le Bonheur"]],
+      [1902, "Theodor Mommsen", ["História de Roma", "O Direito Penal Romano", "Direito Público Romano"]],
+      [1903, "Bjørnstjerne Bjørnson", ["Além das Forças", "Synnøve Solbakken", "Arne"]],
+      [1904, "Frédéric Mistral", ["Mirèio", "Calendau", "Nerto"]],
+      [1904, "José Echegaray", ["O Grande Galeoto", "Loucura ou Santidade", "Mariana"]],
+      [1905, "Henryk Sienkiewicz", ["Quo Vadis", "A Ferro e Fogo", "Os Cavaleiros Teutônicos"]],
+      [1906, "Giosuè Carducci", ["Odes Bárbaras", "Rimas Novas", "Juvenilia"]],
+      [1907, "Rudyard Kipling", ["O Livro da Selva", "Kim", "O Homem que Queria Ser Rei"]],
+      [1908, "Rudolf Christoph Eucken", ["O Sentido e o Valor da Vida", "A Luta pelo Conteúdo Espiritual da Vida", "Prolegômenos"]],
+      [1909, "Selma Lagerlöf", ["A Maravilhosa Viagem de Nils Holgersson", "A Saga de Gösta Berling", "O Imperador de Portugal"]],
+      [1910, "Paul Heyse", ["L'Arrabbiata", "Filhos do Mundo", "Duas Almas"]],
+      [1911, "Maurice Maeterlinck", ["O Pássaro Azul", "Pelléas e Mélisande", "A Vida das Abelhas"]],
+      [1912, "Gerhart Hauptmann", ["Os Tecelões", "O Herege de Soana", "Antes do Pôr do Sol"]],
+      [1913, "Rabindranath Tagore", ["Gitanjali", "O Carteiro do Rei", "O Naufrágio"]],
+      [1915, "Romain Rolland", ["Jean-Christophe", "Acima da Tormenta", "Colas Breugnon"]],
+      [1916, "Verner von Heidenstam", ["Os Carolinos", "Endymion", "Hans Alienus"]],
+      [1917, "Karl Gjellerup", ["O Peregrino Kamanita", "O Moleiro", "Minna"]],
+      [1917, "Henrik Pontoppidan", ["Pedro, o Afortunado", "Terra Prometida", "O Reino dos Mortos"]],
+      [1919, "Carl Spitteler", ["Prometeu e Epimeteu", "Primavera Olímpica", "Gustav"]],
+      [1920, "Knut Hamsun", ["Fome", "Mistérios", "Os Frutos da Terra"]],
+      [1921, "Anatole France", ["A Ilha dos Pinguins", "Os Deuses têm Sede", "O Crime de Sylvestre Bonnard"]],
+      [1922, "Jacinto Benavente", ["Os Interesses Criados", "A Malquerida", "Rosas de Outono"]],
+      [1923, "William Butler Yeats", ["A Torre", "Poemas Escolhidos", "A Rosa Secreta"]],
+      [1924, "Władysław Reymont", ["Os Camponeses", "A Terra Prometida", "A Revolta"]],
+      [1925, "George Bernard Shaw", ["Pigmalião", "Santa Joana", "Homem e Super-Homem"]],
+      [1926, "Grazia Deledda", ["Canas ao Vento", "Cinzas", "Elias Portolu"]],
+      [1927, "Henri Bergson", ["A Evolução Criadora", "Matéria e Memória", "O Riso"]],
+      [1928, "Sigrid Undset", ["Kristin Lavransdatter", "O Mestre de Hestviken", "Jenny"]],
+      [1929, "Thomas Mann", ["A Montanha Mágica", "Morte em Veneza", "Os Buddenbrook"]],
+      [1930, "Sinclair Lewis", ["Babbitt", "Rua Principal", "Não Vai Acontecer Aqui"]],
+      [1931, "Erik Axel Karlfeldt", ["Fridolins visor", "Tankar och tal", "Flora och Bellona"]],
+      [1932, "John Galsworthy", ["A Saga dos Forsyte", "A Colher de Prata", "Canto do Cisne"]],
+      [1933, "Ivan Bunin", ["O Amor de Mitya", "A Aldeia", "O Senhor de São Francisco"]],
+      [1934, "Luigi Pirandello", ["Seis Personagens à Procura de um Autor", "O Falecido Mattia Pascal", "Um, Nenhum e Cem Mil"]],
+      [1936, "Eugene O'Neill", ["Longa Jornada Noite Adentro", "Desejo sob os Ulmeiros", "O Luto Cai Bem em Electra"]],
+      [1937, "Roger Martin du Gard", ["Os Thibault", "Jean Barois", "Velha França"]],
+      [1938, "Pearl S. Buck", ["A Boa Terra", "Vento do Leste, Vento do Oeste", "A Mãe"]],
+      [1939, "Frans Eemil Sillanpää", ["Santa Miséria", "Silja", "Noites de Verão"]],
+      [1944, "Johannes V. Jensen", ["A Queda do Rei", "A Longa Viagem", "Histórias de Himmerland"]],
+      [1945, "Gabriela Mistral", ["Desolação", "Tala", "Lagar"]],
+      [1946, "Hermann Hesse", ["O Lobo da Estepe", "Siddhartha", "Demian"]],
+      [1947, "André Gide", ["Os Moedeiros Falsos", "O Imoralista", "A Sinfonia Pastoral"]],
+      [1948, "T. S. Eliot", ["A Terra Devastada", "Quatro Quartetos", "Assassinato na Catedral"]],
+      [1949, "William Faulkner", ["O Som e a Fúria", "Enquanto Agonizo", "Absalão, Absalão!"]],
+      [1950, "Bertrand Russell", ["História da Filosofia Ocidental", "O Elogio ao Ócio", "Por Que Não Sou Cristão"]],
+      [1951, "Pär Lagerkvist", ["Barrabás", "O Anão", "O Carrasco"]],
+      [1952, "François Mauriac", ["Thérèse Desqueyroux", "O Nó de Víboras", "O Mistério Frontenac"]],
+      [1953, "Winston Churchill", ["Memórias da Segunda Guerra Mundial", "Minha Mocidade", "História dos Povos de Língua Inglesa"]],
+      [1954, "Ernest Hemingway", ["O Velho e o Mar", "Por Quem os Sinos Dobram", "O Sol Também se Levanta"]],
+      [1955, "Halldór Laxness", ["Gente Independente", "O Sino da Islândia", "A Estação Atômica"]],
+      [1956, "Juan Ramón Jiménez", ["Platero e Eu", "Diário de um Poeta Recém-Casado", "Espaço"]],
+      [1957, "Albert Camus", ["O Estrangeiro", "A Peste", "O Mito de Sísifo"]],
+      [1958, "Boris Pasternak", ["Doutor Jivago", "A Minha Irmã, a Vida", "O Segundo Nascimento"]],
+      [1959, "Salvatore Quasimodo", ["E Subitamente a Noite", "Dia Após Dia", "A Vida Não É Sonho"]],
+      [1960, "Saint-John Perse", ["Ânabase", "Exílio", "Pássaros"]],
+      [1961, "Ivo Andrić", ["A Ponte sobre o Drina", "A Crônica de Travnik", "O Pátio Maldito"]],
+      [1962, "John Steinbeck", ["As Vinhas da Ira", "A Leste do Éden", "Ratos e Homens"]],
+      [1963, "Giorgos Seferis", ["Mithistorima", "Três Poemas Secretos", "Diário de Bordo"]],
+      [1964, "Jean-Paul Sartre", ["A Náusea", "O Ser e o Nada", "Entre Quatro Paredes"]],
+      [1965, "Mikhail Sholokhov", ["O Don Silencioso", "Campos Devassados", "O Destino de um Homem"]],
+      [1966, "Shmuel Yosef Agnon", ["O Hóspede da Noite", "Ontem e Anteontem", "O Dote de Noiva"]],
+      [1966, "Nelly Sachs", ["Nas Moradas da Morte", "Eli", "Fuga e Transformação"]],
+      [1967, "Miguel Ángel Asturias", ["O Senhor Presidente", "Homens de Milho", "Lendas da Guatemala"]],
+      [1968, "Yasunari Kawabata", ["País das Neves", "O Som da Montanha", "Beleza e Tristeza"]],
+      [1969, "Samuel Beckett", ["Esperando Godot", "Fim de Partida", "Molloy"]],
+      [1970, "Aleksandr Solzhenitsyn", ["Arquipélago Gulag", "Um Dia na Vida de Ivan Denissovitch", "Pavilhão de Cancerosos"]],
+      [1971, "Pablo Neruda", ["Vinte Poemas de Amor e uma Canção Desesperada", "Canto Geral", "Confesso que Vivi"]],
+      [1972, "Heinrich Böll", ["Opiniões de um Palhaço", "A Honra Perdida de Katharina Blum", "E Não Disse uma Palavra"]],
+      [1973, "Patrick White", ["Voss", "Os Vivisseccionistas", "A Árvore do Homem"]],
+      [1974, "Eyvind Johnson", ["Era nos Dias de sua Graça", "O Retorno a Ítaca", "Nuvens sobre o Ben Nevis"]],
+      [1974, "Harry Martinson", ["Aniara", "As Urtigas Florescem", "Viagens sem Rumo"]],
+      [1975, "Eugenio Montale", ["Ossos de Sépia", "As Ocasiões", "A Tormenta e Outras Coisas"]],
+      [1976, "Saul Bellow", ["As Aventuras de Augie March", "Herzog", "O Planeta do Sr. Sammler"]],
+      [1977, "Vicente Aleixandre", ["A Destruição ou o Amor", "Espada como Lábios", "Sombra do Paraíso"]],
+      [1978, "Isaac Bashevis Singer", ["O Mágico de Lublin", "Inimigos, uma História de Amor", "A Família Moskat"]],
+      [1979, "Odysseas Elytis", ["Axion Esti", "O Sol Primeiro", "As Elegias de Oxópetra"]],
+      [1980, "Czesław Miłosz", ["Mente Cativa", "O Vale do Issa", "Poemas"]],
+      [1981, "Elias Canetti", ["Massa e Poder", "Auto de Fé", "A Língua Absolvida"]],
+      [1982, "Gabriel García Márquez", ["Cem Anos de Solidão", "O Amor nos Tempos do Cólera", "Crônica de uma Morte Anunciada"]],
+      [1983, "William Golding", ["O Senhor das Moscas", "Os Herdeiros", "Ritos de Passagem"]],
+      [1984, "Jaroslav Seifert", ["O Guarda-Chuva de Piccadilly", "O Cometa Halley", "Vestida de Luz"]],
+      [1985, "Claude Simon", ["A Estrada de Flandres", "A Acácia", "O Bonde"]],
+      [1986, "Wole Soyinka", ["O Leão e a Jóia", "O Homem Morreu", "Crônica do Lugar dos Mortos"]],
+      [1987, "Joseph Brodsky", ["Menos que Um", "Marca d'Água", "Poemas Escolhidos"]],
+      [1988, "Naguib Mahfouz", ["Trilogia do Cairo", "O Beco do Pilão", "Filhos do Nosso Bairro"]],
+      [1989, "Camilo José Cela", ["A Colmeia", "A Família de Pascual Duarte", "Mazurca para Dois Mortos"]],
+      [1990, "Octavio Paz", ["O Labirinto da Solidão", "Pedra de Sol", "O Arco e a Lira"]],
+      [1991, "Nadine Gordimer", ["A Filha de Burger", "A Gente de July", "O Enganador"]],
+      [1992, "Derek Walcott", ["Omeros", "Outra Vida", "Poemas Escolhidos"]],
+      [1993, "Toni Morrison", ["Amada", "O Olho Mais Azul", "Canção de Solomon"]],
+      [1994, "Kenzaburō Ōe", ["Uma Questão Pessoal", "Jovens de um Novo Tempo, Despertai!", "Dizem os Mortos"]],
+      [1995, "Seamus Heaney", ["Morte de um Naturalista", "Espirais", "Poemas Escolhidos"]],
+      [1996, "Wisława Szymborska", ["Paisagem com Grão de Areia", "Poemas", "Um Amor Feliz"]],
+      [1997, "Dario Fo", ["Morte Acidental de um Anarquista", "Mistero Buffo", "Não se Paga! Não se Paga!"]],
+      [1998, "José Saramago", ["Ensaio sobre a Cegueira", "Memorial do Convento", "O Evangelho segundo Jesus Cristo"]],
+      [1999, "Günter Grass", ["O Tambor", "O Gato e o Rato", "Anos de Cão"]],
+      [2000, "Gao Xingjian", ["A Montanha da Alma", "O Livro de um Homem Só", "Teatro Escolhido"]],
+      [2001, "V. S. Naipaul", ["Uma Casa para o Sr. Biswas", "Uma Curva no Rio", "No Estado Livre"]],
+      [2002, "Imre Kertész", ["Sem Destino", "Fiasco", "Kaddish pelo Filho Não Nascido"]],
+      [2003, "J. M. Coetzee", ["Desonra", "À Espera dos Bárbaros", "A Vida e a Época de Michael K"]],
+      [2004, "Elfriede Jelinek", ["A Professora de Piano", "As Amantes", "Desejo"]],
+      [2005, "Harold Pinter", ["O Retorno", "Traição", "A Festa de Aniversário"]],
+      [2006, "Orhan Pamuk", ["Meu Nome É Vermelho", "O Museu da Inocência", "Neve"]],
+      [2007, "Doris Lessing", ["O Caderno Dourado", "A Erva Canta", "As Avós"]],
+      [2008, "J. M. G. Le Clézio", ["O Deserto", "A Quarentena", "O Procurador de Ouro"]],
+      [2009, "Herta Müller", ["Tudo o que Eu Tenho Levo Comigo", "Depressões", "A Terra das Ameixas Verdes"]],
+      [2010, "Mario Vargas Llosa", ["A Festa do Bode", "A Cidade e os Cachorros", "Conversa no Catedral"]],
+      [2011, "Tomas Tranströmer", ["Para Vivos e Mortos", "O Céu pela Metade", "Gôndola Fúnebre"]],
+      [2012, "Mo Yan", ["O Clã do Sorgo Vermelho", "As Rãs", "Grandes Seios, Quadris Largos"]],
+      [2013, "Alice Munro", ["O Amor de uma Boa Mulher", "Felicidade Demais", "Vida Querida"]],
+      [2014, "Patrick Modiano", ["Para Que Você Não se Perca no Bairro", "Ronda da Noite", "Dora Bruder"]],
+      [2015, "Svetlana Alexievich", ["Vozes de Tchernóbil", "A Guerra Não Tem Rosto de Mulher", "O Fim do Homem Soviético"]],
+      [2016, "Bob Dylan", ["Crônicas: Volume 1", "Tarântula", "Letras (1961-2012)"]],
+      [2017, "Kazuo Ishiguro", ["Os Vestígios do Dia", "Não Me Abandone Jamais", "Klara e o Sol"]],
+      [2018, "Olga Tokarczuk", ["Os Livros de Jacó", "Viagens", "Sobre os Ossos dos Mortos"]],
+      [2019, "Peter Handke", ["A Perda da Imagem", "A Mulher Canhota", "A Ansiedade do Goleiro no Pênalti"]],
+      [2020, "Louise Glück", ["A Íris Selvagem", "Receitas de Noite", "Fiel e Virtuosa Noite"]],
+      [2021, "Abdulrazak Gurnah", ["Paraíso", "Vidas Seguintes", "Junto ao Mar"]],
+      [2022, "Annie Ernaux", ["Os Anos", "O Acontecimento", "O Lugar"]],
+      [2023, "Jon Fosse", ["Septologia", "Trilogia", "É a Ales"]],
+      [2024, "Han Kang", ["A Vegetariana", "Atos Humanos", "Lições de Grego"]],
+      [2025, "László Krasznahorkai", ["Satantango", "A Melancolia da Resistência", "Barão Wenckheim Volta para Casa"]],
+      [2026, "Anne Carson", ["Autobiografia do Vermelho", "O Gênero do Som", "Eros, o Doce-Amargo"]]
+    ];
+
+    let currentAcquisition = 'todos';
+    let currentActiveFilter = 'todos';
+    let books = [];
+
+    function generateSeed() {
+      const generated = [];
+      nobelMasterDataset.forEach((entry, idx) => {
+        const [year, author, titles] = entry;
+        titles.forEach((title, tIdx) => {
+          let acq = 'pendente';
+          let status = 'nao_lido';
+          let format = 'nenhum';
+          let condition = 0;
+          let rating = 0;
+          let finishedDate = null;
+
+          if (year === 2024 && tIdx === 0) { 
+            acq = 'comprado'; status = 'lido'; format = 'fisico'; condition = 5; rating = 5; finishedDate = '2026-09-18'; 
+          }
+          if (year === 2023 && tIdx === 0) { 
+            acq = 'comprado'; status = 'lendo'; format = 'kindle'; condition = 5; 
+          }
+          if (year === 1982 && tIdx === 0) { 
+            acq = 'comprado'; status = 'lido'; format = 'fisico'; condition = 4; rating = 5; finishedDate = '2026-04-12'; 
+          }
+          if (year === 1929 && tIdx === 0) { 
+            acq = 'recomprar'; status = 'lendo'; format = 'fisico'; condition = 1; 
+          }
+          if (year === 1946 && tIdx === 0) { 
+            acq = 'vender_ruim'; status = 'lido'; format = 'fisico'; condition = 2; rating = 1; finishedDate = '2025-11-20'; 
+          }
+
+          generated.push({
+            id: `nobel_${year}_${tIdx}_${idx}`,
+            title,
+            author,
+            year,
+            tags: ['Nobel'],
+            acquisition: acq,
+            format: format,
+            condition: condition,
+            status: status,
+            rating: rating,
+            finishedDate: finishedDate,
+            color: palette[(idx + tIdx) % palette.length]
+          });
+        });
+      });
+      return generated;
+    }
+
+    function loadData() {
+      const stored = localStorage.getItem('alexandria_db_v1');
+      if (stored) {
+        try {
+          books = JSON.parse(stored);
+        } catch (e) {
+          books = generateSeed();
+        }
+      } else {
+        books = generateSeed();
+        persist();
+      }
+      updateMetrics();
+      renderChips();
+      renderLibrary();
+      renderCalendar();
+    }
+
+    function persist() {
+      localStorage.setItem('alexandria_db_v1', JSON.stringify(books));
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      const total = books.length;
+      const readBooks = books.filter(b => b.status === 'lido').length;
+      const readingBooks = books.filter(b => b.status === 'lendo').length;
+      const currentYear = new Date().getFullYear();
+      const readThisYear = books.filter(b => b.status === 'lido' && b.finishedDate && b.finishedDate.startsWith(currentYear.toString())).length;
+
+      const pct = total === 0 ? 0 : Math.round((readBooks / total) * 100);
+
+      document.getElementById('statReadProgress').innerText = `${readBooks} de ${total} (${pct}%)`;
+      document.getElementById('statProgressBar').style.width = `${pct}%`;
+      document.getElementById('statReadingCount').innerText = readingBooks;
+      document.getElementById('statCurrentYear').innerText = readThisYear;
+    }
+
+    function switchView(view) {
+      if (view === 'library') {
+        document.getElementById('btnViewLibrary').classList.add('active');
+        document.getElementById('btnViewCalendar').classList.remove('active');
+        document.getElementById('librarySection').style.display = 'block';
+        document.getElementById('calendarSection').classList.remove('active');
+      } else {
+        document.getElementById('btnViewLibrary').classList.remove('active');
+        document.getElementById('btnViewCalendar').classList.add('active');
+        document.getElementById('librarySection').style.display = 'none';
+        document.getElementById('calendarSection').classList.add('active');
+        renderCalendar();
+      }
+    }
+
+    function renderChips() {
+      const container = document.getElementById('chipsContainer');
+      container.innerHTML = '';
+
+      const baseFilters = [
+        { id: 'todos', label: 'Todos' },
+        { id: 'lendo', label: '⏳ Lendo' },
+        { id: 'lido', label: '✓ Lido' },
+        { id: 'nao_lido', label: 'Não lidos' }
+      ];
+
+      const tagSet = new Set();
+      books.forEach(b => {
+        (b.tags || []).forEach(t => {
+          if (t && t.trim()) tagSet.add(t.trim());
+        });
+      });
+
+      const allFilters = [
+        ...baseFilters,
+        ...Array.from(tagSet).sort().map(tag => ({ id: `tag:${tag.toLowerCase()}`, label: `# ${tag}` }))
+      ];
+
+      allFilters.forEach(f => {
+        const btn = document.createElement('button');
+        btn.className = `pill ${currentActiveFilter === f.id ? 'active' : ''}`;
+        btn.innerText = f.label;
+        btn.onclick = () => {
+          currentActiveFilter = f.id;
+          renderChips();
+          renderLibrary();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function setAcquisitionFilter(acq, el) {
+      currentAcquisition = acq;
+      document.querySelectorAll('.segmented-control .seg-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderLibrary();
+    }
+
+    function renderLibrary() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const grid = document.getElementById('booksGrid');
+      grid.innerHTML = '';
+
+      const filtered = books.filter(b => {
+        const matchesSearch = (b.title || '').toLowerCase().includes(search) ||
+                              (b.author || '').toLowerCase().includes(search) ||
+                              (String(b.year || '')).includes(search) ||
+                              (b.tags || []).some(t => t.toLowerCase().includes(search));
+        if (!matchesSearch) return false;
+
+        if (currentAcquisition !== 'todos' && b.acquisition !== currentAcquisition) {
+          return false;
+        }
+
+        if (currentActiveFilter === 'lendo') return b.status === 'lendo';
+        if (currentActiveFilter === 'lido') return b.status === 'lido';
+        if (currentActiveFilter === 'nao_lido') return b.status === 'nao_lido';
+        if (currentActiveFilter.startsWith('tag:')) {
+          const targetTag = currentActiveFilter.replace('tag:', '');
+          return (b.tags || []).some(t => t.toLowerCase() === targetTag);
+        }
+
+        return true;
+      });
+
+      document.getElementById('counterLabel').innerText = `Exibindo ${filtered.length} ${filtered.length === 1 ? 'livro' : 'livros'}`;
+
+      filtered.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.style.backgroundColor = book.color || palette[0];
+        card.onclick = () => openEditModal(book.id);
+
+        const isNobel = (book.tags || []).some(t => t.toLowerCase() === 'nobel');
+        const readLabel = book.status === 'lido' ? '✓ Lido' : (book.status === 'lendo' ? '⏳ Lendo' : 'Não lido');
+
+        let acqBadge = '';
+        if (book.acquisition === 'vender_ruim') {
+          acqBadge = `<span class="card-pill alert-vender">💩 Vender</span>`;
+        } else if (book.acquisition === 'recomprar') {
+          acqBadge = `<span class="card-pill alert-recomprar">⚠️ Recomprar</span>`;
+        } else if (book.acquisition === 'comprado') {
+          acqBadge = `<span class="card-pill">📦 Acervo</span>`;
+        } else {
+          acqBadge = `<span class="card-pill">🛒 A Comprar</span>`;
+        }
+
+        let formatBadge = '';
+        if (book.format === 'fisico') formatBadge = `<span class="card-pill format-pill">📖 Físico</span>`;
+        else if (book.format === 'kindle') formatBadge = `<span class="card-pill format-pill">📱 Kindle</span>`;
+
+        let condBadge = '';
+        if (book.condition && book.condition >= 1 && book.condition <= 5) {
+          condBadge = `<span class="card-pill cond-${book.condition}">${conditionLabels[book.condition]}</span>`;
+        }
+
+        let starsHtml = '';
+        if (book.status === 'lido' && book.rating > 0) {
+          starsHtml = `<span class="stars-display">${'★'.repeat(book.rating)}${'☆'.repeat(5 - book.rating)}</span>`;
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="card-badges-row">
+              ${isNobel ? `<span class="card-pill nobel-pill">Nobel ${book.year || ''}</span>` : ''}
+              ${acqBadge}
+              ${formatBadge}
+              ${condBadge}
+            </div>
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">${book.author}</div>
+          </div>
+          <div class="card-footer">
+            <span class="footer-pill">${readLabel}</span>
+            ${starsHtml}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCalendar() {
+      const container = document.getElementById('calendarContainer');
+      container.innerHTML = '';
+
+      const finishedBooks = books.filter(b => b.status === 'lido' && b.finishedDate);
+
+      if (finishedBooks.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--ink-muted);">Nenhum livro com data de conclusão registrada.<br>Ao definir um livro como "Lido", a data informada será agrupada aqui.</div>`;
+        return;
+      }
+
+      finishedBooks.sort((a, b) => new Date(b.finishedDate) - new Date(a.finishedDate));
+
+      const grouped = {};
+      finishedBooks.forEach(b => {
+        const parts = b.finishedDate.split('-');
+        const year = parts[0];
+        const month = parseInt(parts[1], 10) - 1;
+
+        if (!grouped[year]) grouped[year] = {};
+        if (!grouped[year][month]) grouped[year][month] = [];
+        grouped[year][month].push(b);
+      });
+
+      Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
+        const yearBlock = document.createElement('div');
+        yearBlock.className = 'cal-year-block';
+
+        const totalYear = Object.values(grouped[year]).reduce((acc, list) => acc + list.length, 0);
+
+        yearBlock.innerHTML = `
+          <div class="cal-year-header">
+            <span>${year}</span>
+            <span class="cal-year-count">${totalYear} ${totalYear === 1 ? 'livro lido' : 'livros lidos'}</span>
+          </div>
+        `;
+
+        Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
+          const list = grouped[year][month];
+          const monthCard = document.createElement('div');
+          monthCard.className = 'cal-month-card';
+
+          let itemsHtml = '';
+          list.forEach(b => {
+            const stars = b.rating > 0 ? `<span class="stars-display">${'★'.repeat(b.rating)}</span>` : '';
+            itemsHtml += `
+              <div class="cal-item" onclick="openEditModal('${b.id}')">
+                <div class="cal-item-info">
+                  <div class="cal-item-title">${b.title}</div>
+                  <div class="cal-item-sub">${b.author}</div>
+                </div>
+                <div>${stars}</div>
+              </div>
+            `;
+          });
+
+          monthCard.innerHTML = `
+            <div class="cal-month-title">
+              <span>${monthNames[month]}</span>
+              <span>${list.length} ${list.length === 1 ? 'livro' : 'livros'}</span>
+            </div>
+            <div>${itemsHtml}</div>
+          `;
+
+          yearBlock.appendChild(monthCard);
+        });
+
+        container.appendChild(yearBlock);
+      });
+    }
+
+    function toggleReadFields() {
+      const status = document.getElementById('formStatus').value;
+      const extra = document.getElementById('readExtraFields');
+      if (status === 'lido') {
+        extra.style.display = 'block';
+        if (!document.getElementById('formFinishedDate').value) {
+          document.getElementById('formFinishedDate').value = new Date().toISOString().slice(0, 10);
+        }
+      } else {
+        extra.style.display = 'none';
+      }
+    }
+
+    function setFormRating(num) {
+      document.getElementById('formRating').value = num;
+      const starSpans = document.querySelectorAll('#starPicker .star-btn');
+      starSpans.forEach((s, idx) => {
+        if (idx < num) s.classList.add('active');
+        else s.classList.remove('active');
+      });
+    }
+
+    function openAddModal() {
+      document.getElementById('modalHeading').innerText = 'Novo Livro';
+      document.getElementById('formId').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formAuthor').value = '';
+      document.getElementById('formYear').value = '';
+      document.getElementById('formStatus').value = 'nao_lido';
+      document.getElementById('formFinishedDate').value = '';
+      setFormRating(0);
+      document.getElementById('formAcquisition').value = 'pendente';
+      document.getElementById('formFormat').value = 'fisico';
+      document.getElementById('formCondition').value = '5';
+      document.getElementById('formTags').value = 'Nobel';
+      document.getElementById('btnDelete').style.display = 'none';
+      toggleReadFields();
+      document.getElementById('bookModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const b = books.find(item => item.id === id);
+      if (!b) return;
+
+      document.getElementById('modalHeading').innerText = 'Editar Obra';
+      document.getElementById('formId').value = b.id;
+      document.getElementById('formTitle').value = b.title;
+      document.getElementById('formAuthor').value = b.author;
+      document.getElementById('formYear').value = b.year || '';
+      document.getElementById('formStatus').value = b.status || 'nao_lido';
+      document.getElementById('formFinishedDate').value = b.finishedDate || '';
+      setFormRating(b.rating || 0);
+      document.getElementById('formAcquisition').value = b.acquisition || 'pendente';
+      document.getElementById('formFormat').value = b.format || 'nenhum';
+      document.getElementById('formCondition').value = b.condition || 0;
+      document.getElementById('formTags').value = (b.tags || []).join(', ');
+      document.getElementById('btnDelete').style.display = 'block';
+      toggleReadFields();
+      document.getElementById('bookModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('bookModal').classList.remove('active');
+    }
+
+    function saveBook() {
+      const id = document.getElementById('formId').value;
+      const title = document.getElementById('formTitle').value.trim();
+      const author = document.getElementById('formAuthor').value.trim();
+      if (!title || !author) {
+        alert('Título e autor são obrigatórios.');
+        return;
+      }
+
+      const year = parseInt(document.getElementById('formYear').value) || null;
+      const status = document.getElementById('formStatus').value;
+      const finishedDate = status === 'lido' ? document.getElementById('formFinishedDate').value : null;
+      const rating = status === 'lido' ? (parseInt(document.getElementById('formRating').value) || 0) : 0;
+      const acquisition = document.getElementById('formAcquisition').value;
+      const format = document.getElementById('formFormat').value;
+      const condition = parseInt(document.getElementById('formCondition').value) || 0;
+      const tags = document.getElementById('formTags').value.split(',').map(s => s.trim()).filter(Boolean);
+
+      if (id) {
+        const item = books.find(b => b.id === id);
+        if (item) {
+          item.title = title;
+          item.author = author;
+          item.year = year;
+          item.status = status;
+          item.finishedDate = finishedDate;
+          item.rating = rating;
+          item.acquisition = acquisition;
+          item.format = format;
+          item.condition = condition;
+          item.tags = tags;
+        }
+      } else {
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        books.unshift({
+          id: 'custom_' + Date.now(),
+          title,
+          author,
+          year,
+          status,
+          finishedDate,
+          rating,
+          acquisition,
+          format,
+          condition,
+          tags,
+          color
+        });
+      }
+
+      persist();
+      renderChips();
+      renderLibrary();
+      renderCalendar();
+      closeModal();
+    }
+
+    function deleteBook() {
+      const id = document.getElementById('formId').value;
+      if (confirm('Deseja excluir esta obra?')) {
+        books = books.filter(b => b.id !== id);
+        persist();
+        renderChips();
+        renderLibrary();
+        renderCalendar();
+        closeModal();
+      }
+    }
+
+    function exportData() {
+      const dataBlob = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(books, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataBlob);
+      a.setAttribute("download", `alexandria_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            books = parsed;
+            persist();
+            renderChips();
+            renderLibrary();
+            renderCalendar();
+            alert('Biblioteca Alexandria restaurada com sucesso!');
+          }
+        } catch (err) {
+          alert('Arquivo JSON inválido.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
